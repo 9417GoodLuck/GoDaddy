@@ -1,19 +1,19 @@
-# use tensorflow as the model frame
-import tensorflow as tf
-from sklearn.model_selection import GroupKFold
 import numpy as np
 import pandas as pd
 import os
 from sklearn.model_selection import GroupKFold
+# use tensorflow as the model frame
+import tensorflow as tf
 
 VER = 98
 
 # SET NONE TO TRAIN NEW MODEL
-INFER_FROM_PATH = None
+INFER_FROM_PATH = 'models/'
 
-def build_model():
+
+def GRU_Model():
     # input layer
-    inp = tf.keras.Input(shape=(WIDTH - COPIES - 4 - 1, 1))  # INPUT SHAPE IS 12
+    inp = tf.keras.Input(shape=(12, 1))  # INPUT SHAPE IS 12
 
     # three GRU layers
     x = tf.keras.layers.GRU(units=8, return_sequences=True)(inp)
@@ -32,6 +32,9 @@ def build_model():
 
     return model
 
+
+# Choose model
+model = GRU_Model()
 
 # Define parameters
 train_data = pd.read_csv('data/train_data.csv')
@@ -73,9 +76,6 @@ for fold, (train_idx, valid_idx) in enumerate(skf):
     w = np.array([1] * (COPIES - 7) + [1, 1, 2, 2] + [2, 2, 2])
     w = w / np.sum(w)
 
-    # Build the model
-    model = build_model()
-
     # Train the model
     if INFER_FROM_PATH is None:
         h = model.fit(X_train, y_train,
@@ -90,4 +90,3 @@ for fold, (train_idx, valid_idx) in enumerate(skf):
 
     # Predict and fill oof
     oof[valid_idx, :] = model.predict(X_valid, verbose=VERBOSE)
-
